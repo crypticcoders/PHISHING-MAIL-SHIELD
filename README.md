@@ -114,6 +114,7 @@ The goal wasn't just a high accuracy number — it was building a real, reproduc
   <img src="assets/02_architecture_pipeline.png" alt="End-to-end architectural pipeline" width="800">
 </p>
 
+```text
 Raw Email Input
       │
       ▼
@@ -126,11 +127,4 @@ Feature Extraction (TF-IDF + Metadata)
 Model Training (LR, RF, NB, NN)
       │
       ▼
-Majority-Vote Ensemble
-      │
-      ▼
-Classification Result (PHISHING / SAFE)
-
----
-
-      
+Ensemble Vote → PHISHING DETECTED / SAFE-LEGITIMATE
