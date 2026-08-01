@@ -1,3 +1,6 @@
+Here is the **entire, complete `README.md` file** from top to bottom. Select all the text inside the code block below, copy it, and overwrite your `README.md` on GitHub:
+
+```markdown
 # 🛡️ AI-Driven Phishing Email Detection Using NLP
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
@@ -50,8 +53,6 @@ Phishing exploits human trust, not software vulnerabilities — which is exactly
 4. Trains and rigorously compares **four classifiers** — Logistic Regression, Random Forest, Gaussian Naive Bayes, and a Neural Network (MLP) — on identical train/test splits.
 5. Combines the three strongest models into a **majority-vote ensemble** for more robust real-world inference.
 6. Validates everything on unseen, hand-written sample emails — including a genuinely ambiguous case.
-
-The goal wasn't just a high accuracy number — it was building a real, reproducible understanding of every stage of an applied NLP system: the trade-off between interpretability (Logistic Regression), non-linear ensemble strength (Random Forest), probabilistic simplicity (Naive Bayes), and representational flexibility (Neural Networks).
 
 ---
 
@@ -128,7 +129,12 @@ Model Training (LR, RF, NB, NN)
       │
       ▼
 Ensemble Vote → PHISHING DETECTED / SAFE-LEGITIMATE
+
 ```
+
+---
+
+## ⚙️ Methodology
 
 ### 1. Text Preprocessing
 
@@ -141,13 +147,18 @@ def preprocess_email_text(text):
     text = re.sub(r'https?://\S+|www\.\S+', ' url_token ', text)   # Normalize URLs
     text = re.sub(r'[^a-z\s]', '', text)                          # Strip numbers/punctuation
     words = text.split()
+    return ' '.join([w for w in words if w not in STOPWORDS])
+
 ```
+
+---
 
 ### 2. Structural Metadata Features
 
 Computed on the **raw (uncleaned)** body to capture explicit structural and psychological cues:
-- `has_url` — Binary flag (`1` if the body contains an `http(s)://` or `www.` URL, else `0`).
-- `urgency_words` — Binary flag (`1` if the body contains urgency/authority triggers: *urgent, verify, suspend, action, password, login, bank, account*).
+
+* `has_url` — Binary flag (`1` if the body contains an `http(s)://` or `www.` URL, else `0`).
+* `urgency_words` — Binary flag (`1` if the body contains urgency/authority triggers: *urgent, verify, suspend, action, password, login, bank, account*).
 
 ---
 
@@ -160,22 +171,30 @@ vectorizer = TfidfVectorizer(max_features=2500)
 X_tfidf = vectorizer.fit_transform(df_subset['clean_body'])
 metadata_features = csr_matrix(df_subset[['has_url', 'urgency_words']].values)
 X_combined = hstack([X_tfidf, metadata_features]).toarray()  # 2,502 dimensions
+
 ```
 
-    return ' '.join([w for w in words if w not in STOPWORDS])
+---
 
-4. Model Training
-Four algorithmically distinct classifiers were trained on the identical 12,000-row training matrix to ensure fair evaluation:
-```
+### 4. Model Training
+
+Four algorithmically distinct classifiers were trained on the **identical 12,000-row training matrix** to ensure fair evaluation:
+
+```python
 models = {
     "Logistic Regression": LogisticRegression(max_iter=300, random_state=42),
     "Random Forest": RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=42),
     "Naive Bayes": GaussianNB(),
     "Neural Network": MLPClassifier(hidden_layer_sizes=(50,), max_iter=30, random_state=42)
 }
+
 ```
-5. Ensemble Voting
-The three top-performing classifiers (Logistic Regression, Random Forest, and Neural Network) cast a binary vote during inference; the majority decision determines the final label. Naive Bayes was deliberately excluded due to its high false-negative rate.
+
+---
+
+### 5. Ensemble Voting
+
+The three top-performing classifiers (**Logistic Regression**, **Random Forest**, and **Neural Network**) cast a binary vote during inference; the majority decision determines the final label. Naive Bayes was deliberately excluded due to its high false-negative rate.
 
 ---
 
@@ -183,18 +202,10 @@ The three top-performing classifiers (Logistic Regression, Random Forest, and Ne
 
 ### Performance Comparison
 
-<p align="center">
-  <img src="assets/03_performance_comparison.png" alt="Performance Comparison" width="700">
-</p>
-
 ### Confusion Matrices
 
-<p align="center">
-  <img src="assets/04_confusion_matrices.png" alt="Confusion Matrices" width="700">
-</p>
-
 | Model | True Negative | False Positive | False Negative | True Positive |
-| :--- | :---: | :---: | :---: | :---: |
+| --- | --- | --- | --- | --- |
 | **Logistic Regression** | 1,404 | 58 | 62 | 1,476 |
 | **Random Forest** 🥇 | **1,418** | **44** | 53 | 1,485 |
 | **Naive Bayes** | 1,418 | 44 | **199** ⚠️ | 1,339 |
@@ -206,12 +217,8 @@ The three top-performing classifiers (Logistic Regression, Random Forest, and Ne
 
 ### ROC / AUC Analysis
 
-<p align="center">
-  <img src="assets/05_roc_curves.png" alt="ROC Curves" width="600">
-</p>
-
 | Model | AUC |
-| :--- | :---: |
+| --- | --- |
 | **Random Forest** | **0.9891** |
 | **Neural Network** | 0.9862 |
 | **Logistic Regression** | 0.9838 |
@@ -222,7 +229,7 @@ The three top-performing classifiers (Logistic Regression, Random Forest, and Ne
 ## ⚖️ Comparative Model Analysis
 
 | Rank | Model | Key Strength | Key Weakness |
-| :---: | :--- | :--- | :--- |
+| --- | --- | --- | --- |
 | 🥇 **1** | **Random Forest** | Highest overall accuracy, lowest false positives, interpretable via Gini importance | Larger serialized file size |
 | 🥈 **2** | **Neural Network** | Highest phishing recall (lowest false negatives), strong non-linear feature capture | Black-box behavior, higher compute overhead |
 | 🥉 **3** | **Logistic Regression** | High accuracy, fast retraining time, fully interpretable via coefficients | Linear boundary constraint |
@@ -235,7 +242,7 @@ The three top-performing classifiers (Logistic Regression, Random Forest, and Ne
 Four unseen, hand-written test emails were evaluated through the ensemble pipeline:
 
 | Sample Email Context | LR | RF | NN | Ensemble Decision |
-| :--- | :---: | :---: | :---: | :---: |
+| --- | --- | --- | --- | --- |
 | *"Quarterly engineering sync rescheduled to Thursday..."* | Safe | Safe | Safe | ✅ **SAFE / LEGITIMATE** |
 | *"FINAL NOTICE: tax filing discrepancies, update at http://refund-portal-gov.net..."* | Phish | Phish | Phish | 🚨 **PHISHING DETECTED** |
 | *"Your package has shipped via standard transit, track on carrier portal..."* | Safe | **Phish** | Safe | ✅ **SAFE / LEGITIMATE** |
@@ -247,35 +254,31 @@ Four unseen, hand-written test emails were evaluated through the ensemble pipeli
 
 ## 🔬 Feature Importance
 
-<p align="center">
-  <img src="assets/06_feature_importance.png" alt="Top Feature Importance" width="700">
-</p>
-
 The engineered metadata features (`urgency_words`, `has_url`) ranked among the **most influential predictors overall**, confirming that structural cues carry critical signal alongside lexical terms (`verify`, `account`, `suspend`, `password`, `login`, `bank`).
 
 ---
 
 ## 🚧 Challenges Faced
 
-- **Class Boundary Ambiguity:** Operational emails (shipping alerts, system logs) frequently use compressed, urgent tone similar to phishing tactics.
-- **Matrix Tractability:** Balancing TF-IDF vocabulary size (2,500 max features) to ensure memory efficiency during dense matrix operations.
-- **Algorithmic Bias in Naive Bayes:** Analyzing how feature-independence assumptions collapse when handling sparse, high-dimensional TF-IDF matrices.
+* **Class Boundary Ambiguity:** Operational emails (shipping alerts, system logs) frequently use compressed, urgent tone similar to phishing tactics.
+* **Matrix Tractability:** Balancing TF-IDF vocabulary size (2,500 max features) to ensure memory efficiency during dense matrix operations.
+* **Algorithmic Bias in Naive Bayes:** Analyzing how feature-independence assumptions collapse when handling sparse, high-dimensional TF-IDF matrices.
 
 ---
 
 ## 🎓 What I Learned
 
-- Designing end-to-end NLP pipelines for cybersecurity threat classification.
-- Balancing model interpretability against predictive power when selecting models for an ensemble.
-- Evaluating security classifiers based on domain-specific risks (prioritizing Recall to minimize False Negatives).
+* Designing end-to-end NLP pipelines for cybersecurity threat classification.
+* Balancing model interpretability against predictive power when selecting models for an ensemble.
+* Evaluating security classifiers based on domain-specific risks (prioritizing Recall to minimize False Negatives).
 
 ---
 
 ## 🔭 Future Scope
 
-- [ ] Deploy the pipeline as a live web application using **Streamlit**.
-- [ ] Upgrade feature extraction from TF-IDF to transformer embeddings (**BERT** / **RoBERTa**).
-- [ ] Integrate sender reputation metrics (SPF / DKIM / DMARC verification).
+* [ ] Deploy the pipeline as a live web application using **Streamlit**.
+* [ ] Upgrade feature extraction from TF-IDF to transformer embeddings (**BERT** / **RoBERTa**).
+* [ ] Integrate sender reputation metrics (SPF / DKIM / DMARC verification).
 
 ---
 
@@ -299,3 +302,55 @@ phishing-email-detection/
 │   └── PHISHING_MAIL_REPORT.pdf
 ├── README.md
 └── requirements.txt
+
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+```bash
+pip install --upgrade scikit-learn==1.9.0 pandas numpy scipy matplotlib seaborn
+
+```
+
+### Quick Inference Example
+
+```python
+from models import predict_email
+
+sample_email = """
+SECURITY ALERT: Unauthorised login attempt detected on your bank account.
+Please verify your identity immediately at [http://login-auth-verification.com](http://login-auth-verification.com)
+"""
+
+result = predict_email(sample_email)
+print(result)  # Output: 🚨 PHISHING DETECTED
+
+```
+
+---
+
+## 📚 References
+
+1. F. Pedregosa et al., *"Scikit-learn: Machine Learning in Python,"* JMLR, vol. 12, pp. 2825–2830, 2011.
+2. L. Breiman, *"Random Forests,"* Machine Learning, vol. 45, no. 1, pp. 5–32, 2001.
+3. I. Fette, N. Sadeh, and A. Tomasic, *"Learning to detect phishing emails,"* in Proc. WWW, 2007.
+
+---
+
+## 👤 Author
+
+**Christy Joyce A**
+
+*First-year ECE Student, VIT Chennai*
+
+*AI & ML Summer Intern, Indian Institute of Computing and Technology (IICT)*
+
+* **GitHub:** [@crypticcoders](https://github.com/crypticcoders)
+
+```
+
+```
