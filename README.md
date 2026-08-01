@@ -114,7 +114,6 @@ The goal wasn't just a high accuracy number — it was building a real, reproduc
   <img src="assets/02_architecture_pipeline.png" alt="End-to-end architectural pipeline" width="800">
 </p>
 
-```text
 Raw Email Input
       │
       ▼
@@ -123,9 +122,18 @@ Text Preprocessing (RegEx / Stopwords)
       ▼
 Feature Extraction (TF-IDF + Metadata)
       │
-    ▼
+      ▼
 Model Training (LR, RF, NB, NN)
       │
+      ▼
+Majority-Vote Ensemble
+      │
+      ▼
+Classification Result (PHISHING / SAFE)
+
+---
+
+      
 ⚙️ Methodology1. Text PreprocessingPythondef preprocess_email_text(text):
     text = str(text).lower()
     text = re.sub(r'<[^>]+>', ' ', text)                          # strip HTML tags
