@@ -199,3 +199,103 @@ The three top-performing classifiers (Logistic Regression, Random Forest, and Ne
 | **Random Forest** 🥇 | **1,418** | **44** | 53 | 1,485 |
 | **Naive Bayes** | 1,418 | 44 | **199** ⚠️ | 1,339 |
 | **Neural Network** | 1,404 | 58 | **47** | **1,491** |
+
+> **Security Context:** A **false negative** (missing a phishing email) is exponentially more dangerous than a false positive. Naive Bayes missed nearly 4× more phishing emails than any other model, driving the decision to exclude it from the final ensemble.
+
+---
+
+### ROC / AUC Analysis
+
+<p align="center">
+  <img src="assets/05_roc_curves.png" alt="ROC Curves" width="600">
+</p>
+
+| Model | AUC |
+| :--- | :---: |
+| **Random Forest** | **0.9891** |
+| **Neural Network** | 0.9862 |
+| **Logistic Regression** | 0.9838 |
+| **Naive Bayes** | 0.9540 |
+
+---
+
+## ⚖️ Comparative Model Analysis
+
+| Rank | Model | Key Strength | Key Weakness |
+| :---: | :--- | :--- | :--- |
+| 🥇 **1** | **Random Forest** | Highest overall accuracy, lowest false positives, interpretable via Gini importance | Larger serialized file size |
+| 🥈 **2** | **Neural Network** | Highest phishing recall (lowest false negatives), strong non-linear feature capture | Black-box behavior, higher compute overhead |
+| 🥉 **3** | **Logistic Regression** | High accuracy, fast retraining time, fully interpretable via coefficients | Linear boundary constraint |
+| **4** | **Naive Bayes** | Instant training time, lightweight probabilistic baseline | Unrealistic feature-independence assumption breaks under correlated TF-IDF terms |
+
+---
+
+## 🧪 Live Ensemble Testing
+
+Four unseen, hand-written test emails were evaluated through the ensemble pipeline:
+
+| Sample Email Context | LR | RF | NN | Ensemble Decision |
+| :--- | :---: | :---: | :---: | :---: |
+| *"Quarterly engineering sync rescheduled to Thursday..."* | Safe | Safe | Safe | ✅ **SAFE / LEGITIMATE** |
+| *"FINAL NOTICE: tax filing discrepancies, update at http://refund-portal-gov.net..."* | Phish | Phish | Phish | 🚨 **PHISHING DETECTED** |
+| *"Your package has shipped via standard transit, track on carrier portal..."* | Safe | **Phish** | Safe | ✅ **SAFE / LEGITIMATE** |
+| *"SECURITY ALERT: unauthorised login to your banking app, reset at http://login-auth-verification.com..."* | Phish | Phish | Phish | 🚨 **PHISHING DETECTED** |
+
+> **Key Takeaway:** In the third sample, Random Forest over-indexed on the tracking link and misclassified the email as phishing. LR and NN correctly identified it as benign, allowing the majority vote to prevent a false alarm.
+
+---
+
+## 🔬 Feature Importance
+
+<p align="center">
+  <img src="assets/06_feature_importance.png" alt="Top Feature Importance" width="700">
+</p>
+
+The engineered metadata features (`urgency_words`, `has_url`) ranked among the **most influential predictors overall**, confirming that structural cues carry critical signal alongside lexical terms (`verify`, `account`, `suspend`, `password`, `login`, `bank`).
+
+---
+
+## 🚧 Challenges Faced
+
+- **Class Boundary Ambiguity:** Operational emails (shipping alerts, system logs) frequently use compressed, urgent tone similar to phishing tactics.
+- **Matrix Tractability:** Balancing TF-IDF vocabulary size (2,500 max features) to ensure memory efficiency during dense matrix operations.
+- **Algorithmic Bias in Naive Bayes:** Analyzing how feature-independence assumptions collapse when handling sparse, high-dimensional TF-IDF matrices.
+
+---
+
+## 🎓 What I Learned
+
+- Designing end-to-end NLP pipelines for cybersecurity threat classification.
+- Balancing model interpretability against predictive power when selecting models for an ensemble.
+- Evaluating security classifiers based on domain-specific risks (prioritizing Recall to minimize False Negatives).
+
+---
+
+## 🔭 Future Scope
+
+- [ ] Deploy the pipeline as a live web application using **Streamlit**.
+- [ ] Upgrade feature extraction from TF-IDF to transformer embeddings (**BERT** / **RoBERTa**).
+- [ ] Integrate sender reputation metrics (SPF / DKIM / DMARC verification).
+
+---
+
+## 📁 Project Structure
+
+```text
+phishing-email-detection/
+├── assets/
+│   ├── 01_class_distribution.png
+│   ├── 02_architecture_pipeline.png
+│   ├── 03_performance_comparison.png
+│   ├── 04_confusion_matrices.png
+│   ├── 05_roc_curves.png
+│   └── 06_feature_importance.png
+├── notebook/
+│   └── phishing_email_detection.ipynb
+├── models/
+│   ├── phishing_models.pkl
+│   └── phishing_vectorizer.pkl
+├── report/
+│   └── PHISHING_MAIL_REPORT.pdf
+├── README.md
+└── requirements.txt
