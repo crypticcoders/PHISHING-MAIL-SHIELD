@@ -1,6 +1,6 @@
-Here is the **entire, complete `README.md` file** from top to bottom. Select all the text inside the code block below, copy it, and overwrite your `README.md` on GitHub:
 
-```markdown
+
+markdown
 # 🛡️ AI-Driven Phishing Email Detection Using NLP
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
