@@ -91,7 +91,7 @@ Phishing exploits human trust, not software vulnerabilities — which is exactly
 ## 📂 Dataset
 
 <p align="center">
-  <img src="assets/01_class_distribution.png" alt="Class distribution of the working dataset" width="480">
+  <img src="asset/01_class_distribution.png" alt="Class distribution of the working dataset" width="480">
 </p>
 
 | Attribute | Value |
@@ -112,7 +112,7 @@ Phishing exploits human trust, not software vulnerabilities — which is exactly
 ## 🏗️ Pipeline Architecture
 
 <p align="center">
-  <img src="assets/02_architecture_pipeline.png" alt="End-to-end architectural pipeline" width="800">
+  <img src="asset/02_architecture_pipeline.png" alt="End-to-end architectural pipeline" width="800">
 </p>
 
 ```text
