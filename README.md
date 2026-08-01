@@ -128,3 +128,74 @@ Model Training (LR, RF, NB, NN)
       │
       ▼
 Ensemble Vote → PHISHING DETECTED / SAFE-LEGITIMATE
+```
+
+### 1. Text Preprocessing
+
+Email bodies undergo a strict cleaning order to remove noise while preserving semantic intent:
+
+```python
+def preprocess_email_text(text):
+    text = str(text).lower()
+    text = re.sub(r'<[^>]+>', ' ', text)                          # Strip HTML tags
+    text = re.sub(r'https?://\S+|www\.\S+', ' url_token ', text)   # Normalize URLs
+    text = re.sub(r'[^a-z\s]', '', text)                          # Strip numbers/punctuation
+    words = text.split()
+```
+
+### 2. Structural Metadata Features
+
+Computed on the **raw (uncleaned)** body to capture explicit structural and psychological cues:
+- `has_url` — Binary flag (`1` if the body contains an `http(s)://` or `www.` URL, else `0`).
+- `urgency_words` — Binary flag (`1` if the body contains urgency/authority triggers: *urgent, verify, suspend, action, password, login, bank, account*).
+
+---
+
+### 3. Feature Fusion
+
+Cleaned text is vectorized using TF-IDF (top 2,500 terms) and combined with dense structural metadata into a **2,502-dimensional feature space**:
+
+```python
+vectorizer = TfidfVectorizer(max_features=2500)
+X_tfidf = vectorizer.fit_transform(df_subset['clean_body'])
+metadata_features = csr_matrix(df_subset[['has_url', 'urgency_words']].values)
+X_combined = hstack([X_tfidf, metadata_features]).toarray()  # 2,502 dimensions
+```
+
+    return ' '.join([w for w in words if w not in STOPWORDS])
+
+4. Model Training
+Four algorithmically distinct classifiers were trained on the identical 12,000-row training matrix to ensure fair evaluation:
+```
+models = {
+    "Logistic Regression": LogisticRegression(max_iter=300, random_state=42),
+    "Random Forest": RandomForestClassifier(n_estimators=100, n_jobs=-1, random_state=42),
+    "Naive Bayes": GaussianNB(),
+    "Neural Network": MLPClassifier(hidden_layer_sizes=(50,), max_iter=30, random_state=42)
+}
+```
+5. Ensemble Voting
+The three top-performing classifiers (Logistic Regression, Random Forest, and Neural Network) cast a binary vote during inference; the majority decision determines the final label. Naive Bayes was deliberately excluded due to its high false-negative rate.
+
+---
+
+## 📊 Results & Visualizations
+
+### Performance Comparison
+
+<p align="center">
+  <img src="assets/03_performance_comparison.png" alt="Performance Comparison" width="700">
+</p>
+
+### Confusion Matrices
+
+<p align="center">
+  <img src="assets/04_confusion_matrices.png" alt="Confusion Matrices" width="700">
+</p>
+
+| Model | True Negative | False Positive | False Negative | True Positive |
+| :--- | :---: | :---: | :---: | :---: |
+| **Logistic Regression** | 1,404 | 58 | 62 | 1,476 |
+| **Random Forest** 🥇 | **1,418** | **44** | 53 | 1,485 |
+| **Naive Bayes** | 1,418 | 44 | **199** ⚠️ | 1,339 |
+| **Neural Network** | 1,404 | 58 | **47** | **1,491** |
